@@ -10,9 +10,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.silmood.project2_fragmentssample.R;
+import com.silmood.project2_fragmentssample.ui.MainActivity;
+import com.silmood.project2_fragmentssample.ui.domain.Pokemon;
+
+import java.util.Random;
 
 /**
  * Created by Pedro Antonio Hernández on 25/06/2015.
@@ -21,6 +27,14 @@ import com.silmood.project2_fragmentssample.R;
 public class MainFragment extends Fragment{
 
     public static final String LOG_TAG = MainFragment.class.getSimpleName();
+
+    Pokemon[] pokemons;
+
+    OnFragmentInteractionListener listener = null;
+
+    private Button btnInteraction;
+
+    private ImageView image;
 
     /**
      * Regresar una nueva instancia de la clase {@link MainFragment}
@@ -45,15 +59,14 @@ public class MainFragment extends Fragment{
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        Log.i(LOG_TAG, "onAttach()");
+        if(activity instanceof MainActivity)
+            setListener((MainActivity) activity);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if(savedInstanceState.containsKey("comprobacion"))
-            Log.i(LOG_TAG, savedInstanceState.getString("comprobacion"));
+        setupPokemons();
     }
 
     @Nullable
@@ -62,6 +75,19 @@ public class MainFragment extends Fragment{
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
         LinearLayout layout = (LinearLayout) root.findViewById(R.id.fragment_container);
+        btnInteraction = (Button) root.findViewById(R.id.btn_interaction);
+
+        btnInteraction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    Random randomizer = new Random();
+                    listener.onInteraction(pokemons[randomizer.nextInt(3)]);
+                }
+            }
+        });
+
+        image.setImageResource(R.drawable.pokemon);
 
         //Acceso a los argumentos
         int color = getArguments().getInt("color");
@@ -70,9 +96,24 @@ public class MainFragment extends Fragment{
         return root;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("comprobacion", "save instance");
+    private void setupPokemons(){
+        pokemons = new Pokemon[3];
+
+        pokemons[0] = new Pokemon("Chikorita");
+        pokemons[1] = new Pokemon("Raichu");
+        pokemons[2] = new Pokemon("Magickarp");
+    }
+
+    public void setListener(OnFragmentInteractionListener listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * Interfaz que tendrá que implementar la clase que quiera escuchar los eventos del fragmento
+     * */
+    public interface OnFragmentInteractionListener{
+
+
+        void onInteraction(Pokemon pokemon);
     }
 }
